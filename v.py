@@ -272,7 +272,7 @@ def getDomainVNCPort(dom_name):
         port = int(output[1:])
     return port
 
-def virDomainList():
+def virDomainList(*args):
     """List all domain info in this host
     
     :returns: TODO
@@ -309,8 +309,20 @@ def virDomainList():
     status = 0
     return (status, output)
 
+def virDomainEditXML(*args):
+    """TODO: Docstring for virDomainEditXML.
+
+    :dom_name: TODO
+    :returns: TODO
+
+    """
+    status = 1
+    output = 'v command doest not support editing XML of domain, use "virsh edit" directly'
+    return (status, output)
+
 modified_cmds={
-    "list"                         : virDomainList,
+    "list"   : virDomainList,
+    "edit"   : virDomainEditXML,
 }
 
 
@@ -330,7 +342,8 @@ def main():
 
     """
     args = sys.argv[:]
-    if len(args) < 2:
+    argc = len(args)
+    if argc < 2:
         cmd_str = 'virsh help'
         func = partial(commands.getstatusoutput, cmd_str)
     else:
@@ -344,7 +357,7 @@ def main():
         elif len(full_cmds) == 1:
             args[1] = full_cmds.keys()[0]
             if args[1] in modified_cmds:
-                func = modified_cmds[args[1]]
+                func = partial(modified_cmds[args[1]], args[2:] if argc > 2 else list())
             else:
                 cmd_str = 'virsh %s' % (' '.join(args[1:]))
                 func = partial(commands.getstatusoutput, cmd_str)
