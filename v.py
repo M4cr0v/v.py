@@ -12,7 +12,6 @@ except ImportError, e:
     print e
     print 'Please install tabulate first, command: "pip install tabulate".'
     raise ImportError
-import pdb
 
 virsh_cmds={
     "attach-device"                : "attach device from an XML file",
