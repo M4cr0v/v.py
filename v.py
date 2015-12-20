@@ -332,8 +332,11 @@ def lookup_full_cmd(short_cmd):
     :returns: a dictionary of matched commands
 
     """
-    #return {k:v for k,v in virsh_cmds.items() if k.startswith(short_cmd)}  #python 2.7 or 3.0
-    return dict((k, v) for k,v in virsh_cmds.items() if k.startswith(short_cmd))  #python 2.6
+    if short_cmd in virsh_cmds.keys():
+        return {short_cmd: virsh_cmds.get(short_cmd)}
+    else:
+        #return {k:v for k,v in virsh_cmds.items() if k.startswith(short_cmd)}  #python 2.7 or 3.0
+        return dict((k, v) for k,v in virsh_cmds.items() if k.startswith(short_cmd))  #python 2.6
 
 def main():
     """TODO: Docstring for main.
