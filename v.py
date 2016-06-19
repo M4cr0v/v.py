@@ -257,18 +257,20 @@ def closeConnection(conn):
     else:
         return 0
 
-def getDomainVNCPort(dom_name):
-    """TODO: Docstring for getDomainVNCPort.
+def getDomainDisplayPort(dom_name, display_type):
+    """TODO: Docstring for getDomainDisplayPort.
 
     :dom_name: TODO
+    :display_type: TODO
     :returns: TODO
 
     """
-    status, output = commands.getstatusoutput('virsh vncdisplay %s' % (dom_name))
+    cmd_str = 'virsh domdisplay %s --type %s' % (dom_name, display_type)
+    status, output = commands.getstatusoutput(cmd_str)
     if status:
         port = -1
     else:
-        port = int(output[1:])
+        port = int(output.split(':')[-1].split('/')[0])
     return port
 
 def virDomainList(*args):
@@ -287,7 +289,7 @@ def virDomainList(*args):
         6: 'CRASHED',     #/* the domain is crashed */
         7: 'PMSUSPENDED'  #/* the domain is suspended by guest power management */
     }
-    headers=['Id', 'Name', 'VNC', 'UUID', 'State', 'MaxMemory', 'MEMORY', 'VCPUS', 'CpuTime']
+    headers=['Id', 'Name', 'VNC', 'SPICE', 'UUID', 'State', 'MaxMemory', 'MEMORY', 'VCPUS', 'CpuTime']
     conn = createConnection()
     doms = conn.listAllDomains()
     info_table = list()
@@ -295,7 +297,10 @@ def virDomainList(*args):
         dom_info = list()
         dom_info.append(dom.ID())
         dom_info.append(dom.name())
-        dom_info.append(getDomainVNCPort(dom.name()))
+        vnc_port = getDomainDisplayPort(dom.name(), 'vnc')
+        spice_port = getDomainDisplayPort(dom.name(), 'spice')
+        dom_info.append(vnc_port)
+        dom_info.append(spice_port)
         dom_info.append(dom.UUIDString())
         info = dom.info()
         dom_info.append(virDomainState[info[0]])
