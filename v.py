@@ -52,9 +52,15 @@ def getDomainDisplayPort(dom_name, display_type):
     status, output = commands.getstatusoutput(cmd_str)
     if status:
         port = -1
+        tls_port = -1
     else:
-        port = int(output.split(':')[-1].split('/')[0])
-    return port
+        _tmp_str = output.split(':')[-1]
+        port = int(_tmp_str.split('?')[0])
+        if 'tls-port' in _tmp_str:
+	    tls_port = int(_tmp_str.split('=')[-1])
+        else:
+	    tls_port = -1
+    return port, tls_port
 
 def virDomainList(*args):
     """List all domain info in this host
@@ -72,7 +78,7 @@ def virDomainList(*args):
         6: 'CRASHED',     #/* the domain is crashed */
         7: 'PMSUSPENDED'  #/* the domain is suspended by guest power management */
     }
-    headers=['Id', 'Name', 'VNC', 'SPICE', 'UUID', 'State', 'MaxMemory', 'MEMORY', 'VCPUS']
+    headers=['Id', 'Name', 'VNC', 'SPICE(TLS)', 'UUID', 'State', 'MaxMemory', 'MEMORY', 'VCPUS']
     conn = createConnection()
     doms = conn.listAllDomains()
     info_table = list()
@@ -80,10 +86,10 @@ def virDomainList(*args):
         dom_info = list()
         dom_info.append(dom.ID())
         dom_info.append(dom.name())
-        vnc_port = getDomainDisplayPort(dom.name(), 'vnc')
-        spice_port = getDomainDisplayPort(dom.name(), 'spice')
+        vnc_port, vnc_tls_port = getDomainDisplayPort(dom.name(), 'vnc')
+        spice_port, spice_tls_port = getDomainDisplayPort(dom.name(), 'spice')
         dom_info.append(vnc_port)
-        dom_info.append(spice_port)
+        dom_info.append('%s(%s)' % (spice_port, spice_tls_port))
         dom_info.append(dom.UUIDString())
         info = dom.info()
         dom_info.append(virDomainState[info[0]])
