@@ -72,7 +72,7 @@ def virDomainList(*args):
         6: 'CRASHED',     #/* the domain is crashed */
         7: 'PMSUSPENDED'  #/* the domain is suspended by guest power management */
     }
-    headers=['Id', 'Name', 'VNC', 'SPICE', 'UUID', 'State', 'MaxMemory', 'MEMORY', 'VCPUS', 'CpuTime']
+    headers=['Id', 'Name', 'VNC', 'SPICE', 'UUID', 'State', 'MaxMemory', 'MEMORY', 'VCPUS']
     conn = createConnection()
     doms = conn.listAllDomains()
     info_table = list()
@@ -87,7 +87,7 @@ def virDomainList(*args):
         dom_info.append(dom.UUIDString())
         info = dom.info()
         dom_info.append(virDomainState[info[0]])
-        dom_info.extend(info[1:])
+        dom_info.extend(info[1:4])
         info_table.append(dom_info)
     closeConnection(conn)
     info_table.sort()
